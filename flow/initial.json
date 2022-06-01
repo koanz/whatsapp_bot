@@ -21,12 +21,14 @@
         "keywords":  [
             "cursos",
             "info",
-            "curso"        ],
+            "curso",
+            "spa"
+        ],
         "key": "STEP_2"
     },
     {
         "keywords":  [
-            "angular"
+            "#"
         ],
         "key": "STEP_2_1"
     },

@@ -94,9 +94,25 @@ const lastTrigger = (number) => new Promise((resolve, reject) => {
  * @param {*} message 
  */
 const readChat = async (number, message, trigger = null) => {
-    number = cleanNumber(number)
-    await saveMessage( message, trigger, number )
-    console.log('Saved')
+    number = cleanNumber(number);
+    await saveMessage( message, trigger, number );
+    console.log("Mensaje: "+message);
+    console.log("Número: "+number);
+    //const flag = /^hello/.test(message);
+    console.log('Saved');
 }
 
-module.exports = { sendMessage, sendMedia, lastTrigger, sendMessageButton, readChat, sendMediaVoiceNote }
+const sendSolicitudPagoId = async (id, port) => {
+    let url = `http://localhost:${port}/whatsapp_web/get_url_solicitud_pago?id=${id}`;
+    let response = await fetch(url);
+
+    if (response.ok) { // si el HTTP-status es 200-299, obtener cuerpo de la respuesta (método debajo)
+        let json = await response.json();
+    } else {
+        alert("Error-HTTP: " + response.status);
+    }
+
+    console.log(response);
+}
+
+module.exports = { sendMessage, sendMedia, lastTrigger, sendMessageButton, readChat, sendMediaVoiceNote,  sendSolicitudPagoId}

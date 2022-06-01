@@ -24,5 +24,4 @@ const bothResponse = async (message) => {
     return data
 }
 
-
 module.exports = { getMessages, responseMessages, bothResponse }

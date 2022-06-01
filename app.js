@@ -5,6 +5,7 @@ require('dotenv').config()
 const fs = require('fs');
 const express = require('express');
 const cors = require('cors')
+// const request = require("request");
 const qrcode = require('qrcode-terminal');
 const { Client } = require('whatsapp-web.js');
 const mysqlConnection = require('./config/mysql')
@@ -13,7 +14,7 @@ const { generateImage, cleanNumber, checkEnvFile, createClient, isValidNumber } 
 const { connectionReady, connectionLost } = require('./controllers/connection')
 const { saveMedia } = require('./controllers/save')
 const { getMessages, responseMessages, bothResponse } = require('./controllers/flows')
-const { sendMedia, sendMessage, lastTrigger, sendMessageButton, readChat } = require('./controllers/send')
+const { sendMedia, sendMessage, lastTrigger, sendMessageButton, readChat, sendSolicitudPagoId} = require('./controllers/send')
 const app = express();
 app.use(cors())
 app.use(express.json())
@@ -21,6 +22,7 @@ const MULTI_DEVICE = process.env.MULTI_DEVICE || 'true';
 const server = require('http').Server(app)
 
 const port = process.env.PORT || 3000
+const twilioPort = process.env.TWILIO_PORT;
 const SESSION_FILE_PATH = './session.json';
 var client;
 var sessionData;
@@ -42,6 +44,8 @@ const listenMessage = () => client.on('message', async msg => {
         return
     }
     message = body.toLowerCase();
+    console.log('EPA!');
+
     console.log('BODY',message)
     const number = cleanNumber(from)
     await readChat(number, message)
@@ -86,6 +90,8 @@ const listenMessage = () => client.on('message', async msg => {
     const step = await getMessages(message);
 
     if (step) {
+        console.log(step);
+
         const response = await responseMessages(step);
 
         /**
@@ -94,15 +100,16 @@ const listenMessage = () => client.on('message', async msg => {
 
         await sendMessage(client, from, response.replyMessage, response.trigger);
 
+
         if(response.hasOwnProperty('actions')){
             const { actions } = response;
             await sendMessageButton(client, from, null, actions);
             return
         }
 
-        if (!response.delay && response.media) {
-            sendMedia(client, from, response.media);
-        }
+        // if (!response.delay && response.media) {
+        //     sendMedia(client, from, response.media);
+        // }
         if (response.delay && response.media) {
             setTimeout(() => {
                 sendMedia(client, from, response.media);
@@ -181,6 +188,7 @@ const withOutSession = () => {
     });
 
     client.on('authenticated', (session) => {
+        console.log(session);
         sessionData = session;
         if(sessionData){
             fs.writeFile(SESSION_FILE_PATH, JSON.stringify(session), function (err) {
